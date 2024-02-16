@@ -1,5 +1,7 @@
 from multiprocessing import connection, Pipe
+from multiprocessing.connection import Connection
 from threading import Thread
+import tensorflow as tf
 
 import os
 import numpy as np
@@ -13,11 +15,12 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 class CChessModelAPI:
 
-    def __init__(self, config: Config, agent_model):  
+    def __init__(self, config: Config, agent_model):
         self.agent_model = agent_model  # CChessModel
-        self.pipes = []     # use for communication between processes/threads
+        self.pipes = []  # use for communication between processes/threads
         self.config = config
         self.need_reload = True
         self.done = False
@@ -28,7 +31,9 @@ class CChessModelAPI:
         prediction_worker.daemon = True
         prediction_worker.start()
 
-    def get_pipe(self, need_reload=True):
+    def get_pipe(self, need_reload=True) -> Connection:
+        me: Connection
+        you: Connection
         me, you = Pipe()
         self.pipes.append(me)
         self.need_reload = need_reload
@@ -50,6 +55,7 @@ class CChessModelAPI:
                 while pipe.poll():
                     try:
                         tmp = pipe.recv()
+                        # logger.debug(f"pipe recv data is: {tmp}")
                     except EOFError as e:
                         logger.error(f"EOF error: {e}")
                         pipe.close()
@@ -60,8 +66,11 @@ class CChessModelAPI:
             if not data:
                 continue
             data = np.asarray(data, dtype=np.float32)
-            with self.agent_model.graph.as_default():
-                policy_ary, value_ary = self.agent_model.model.predict_on_batch(data)
+            data = np.transpose(data, (0, 2, 3, 1))
+            data = tf.convert_to_tensor(data)
+            # with self.agent_model.graph.as_default():
+            # keras.src.engine.training.Model
+            policy_ary, value_ary = self.agent_model.model.predict_on_batch(data)
             buf = []
             k, i = 0, 0
             for p, v in zip(policy_ary, value_ary):

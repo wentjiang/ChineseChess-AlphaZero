@@ -1,5 +1,8 @@
 import os
-import gc 
+import gc
+from multiprocessing.connection import Connection
+from typing import List
+
 import numpy as np
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
@@ -44,8 +47,8 @@ class SelfPlayWorker:
         """
         self.config = config
         self.current_model, self.use_history = self.load_model()
-        self.m = Manager()
-        self.cur_pipes = self.m.list([self.current_model.get_pipes() for _ in range(self.config.play.max_processes)])
+        self.m: Manager = Manager()
+        self.cur_pipes: List[Connection] = self.m.list([self.current_model.get_pipes() for _ in range(self.config.play.max_processes)])
 
     def start(self):
         global job_done

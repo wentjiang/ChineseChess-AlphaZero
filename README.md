@@ -28,9 +28,9 @@ If you want to join us to build the best chinese chess AI in the world:
 
 ## Environment
 
-* Python 3.6.3
-* tensorflow-gpu: 1.3.0
-* Keras: 2.0.8
+* Python 3.11.3
+* tensorflow: 2.13.1
+* Keras: 2.13.1
 
 
 ## Modules
