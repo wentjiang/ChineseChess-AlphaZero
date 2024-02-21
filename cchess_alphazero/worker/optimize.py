@@ -108,6 +108,7 @@ class OptimizeWorker:
     def train_epoch(self, epochs):
         tc = self.config.trainer
         state_ary, policy_ary, value_ary = self.collect_all_loaded_data()
+        state_ary = np.transpose(state_ary, (0, 2, 3, 1))
         tensorboard_cb = TensorBoard(log_dir="./logs", batch_size=tc.batch_size, histogram_freq=1)
         if self.config.opts.use_multiple_gpus:
             self.mg_model.fit(state_ary, [policy_ary, value_ary],

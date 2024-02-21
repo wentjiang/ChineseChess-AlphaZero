@@ -77,7 +77,6 @@ class SelfPlayWorker:
 
         idx = 1
         self.buffer = []
-        search_tree = defaultdict(VisitState)
 
         while True:
             start_time = time()
